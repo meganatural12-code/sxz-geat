@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kingdom Bot</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body { font-family: sans-serif; background: #1a1a1a; color: white; margin: 0; padding-bottom: 60px; }
+        .tab-content { display: none; padding: 20px; }
+        .active { display: block; }
+        
+        /* Навигация */
+        .navbar { position: fixed; bottom: 0; width: 100%; display: flex; background: #333; height: 60px; }
+        .nav-item { flex: 1; text-align: center; padding: 10px; font-size: 12px; cursor: pointer; border-top: 2px solid transparent; }
+        .nav-item.active-tab { border-top: 2px solid #0088cc; color: #0088cc; }
+
+        /* Элементы игры */
+        .btn { background: #0088cc; border: none; color: white; padding: 10px; border-radius: 5px; width: 100%; margin-top: 10px; }
+        .stat-bar { background: #444; height: 20px; border-radius: 10px; margin: 10px 0; overflow: hidden; }
+        .health-fill { background: #ff4d4d; height: 100%; width: 100%; transition: width 0.3s; }
+    </style>
+</head>
+<body>
+
+    <!-- Вкладки -->
+    <div id="tab1" class="tab-content active">
+        <h2>🏙 City: <span id="kingdom-name">Загрузка...</span></h2>
+        <div class="stat-bar"><div id="hp-bar" class="health-fill"></div></div>
+        <p>Здоровье: <span id="hp-text">100</span>/100</p>
+        <button class="btn" onclick="useHeal()">Использовать аптечку</button>
+    </div>
+
+    <div id="tab2" class="tab-content"><h2>👥 Recruitment</h2><p>Найм ботов и игроков.</p></div>
+    <div id="tab3" class="tab-content"><h2>⚖️ Market</h2><p>Обмен ресурсов 3 к 1.</p></div>
+    <div id="tab4" class="tab-content"><h2>⚒ Forge</h2><p>Создание оружия и брони.</p></div>
+    <div id="tab5" class="tab-content"><h2>⚔️ Arena</h2><p>Башня испытаний (в разработке).</p></div>
+    <div id="tab6" class="tab-content"><h2>⚙️ Settings</h2><button class="btn">Изменить аватар</button></div>
+
+    <!-- Навигация -->
+    <div class="navbar">
+        <div class="nav-item active-tab" onclick="openTab(event, 'tab1')">City</div>
+        <div class="nav-item" onclick="openTab(event, 'tab2')">Recruit</div>
+        <div class="nav-item" onclick="openTab(event, 'tab3')">Market</div>
+        <div class="nav-item" onclick="openTab(event, 'tab4')">Forge</div>
+        <div class="nav-item" onclick="openTab(event, 'tab5')">Arena</div>
+        <div class="nav-item" onclick="openTab(event, 'tab6')">Settings</div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+
+        let player = {
+            name: "Мое Королевство",
+            health: 100,
+            hasProtection: true, // Защита медикаментами
+            meds: 5
+        };
+
+        // Логика использования медикаментов
+        function useHeal() {
+            // Если здоровье полное и есть защита, ресурсы не тратятся
+            if (player.health >= 100 && player.hasProtection) {
+                tg.showAlert("У вас полное здоровье и активна защита. Ресурсы сохранены!");
+                return;
+            }
+            
+            if (player.meds > 0) {
+                player.meds--;
+                player.health = Math.min(100, player.health + 20);
+                updateUI();
+            }
+        }
+
+        function updateUI() {
+            document.getElementById('hp-bar').style.width = player.health + '%';
+            document.getElementById('hp-text').innerText = player.health;
+            document.getElementById('kingdom-name').innerText = player.name;
+        }
+
+        function openTab(evt, tabName) {
+            let contents = document.getElementsByClassName("tab-content");
+            for (let i = 0; i < contents.length; i++) contents[i].style.display = "none";
+            
+            let tabs = document.getElementsByClassName("nav-item");
+            for (let i = 0; i < tabs.length; i++) tabs[i].classList.remove("active-tab");
+
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.classList.add("active-tab");
+        }
+
+        updateUI();
+    </script>
+</body>
+</html>
